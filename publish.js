@@ -1,6 +1,8 @@
 /*global env: true */
 'use strict';
 
+console.log("### craft-docdash loaded");
+
 var doop = require('jsdoc/util/doop');
 var fs = require('jsdoc/fs');
 var helper = require('jsdoc/util/templateHelper');
@@ -399,6 +401,119 @@ function buildMemberNav(items, itemHeading, itemsSeen, linktoFn) {
     return nav;
 }
 
+console.log("*** craft-dock loaded");
+
+function buildPackageNav(items, itemHeading, itemsSeen, linktoFn) {
+    var nav = '';
+    
+    var itemsNav = '';
+    var docdash = env && env.conf && env.conf.docdash || {};
+    
+    // organize
+    var tree = {};
+    items.forEach(function(item) {
+	    var packagename = item.packagename;
+	    var paths = packagename.split('.');
+	    var edge = tree;
+	    for( var i=0; i<paths.length; i++ ){
+			if( i === paths.length-1 ){
+				item.packageDepth = i;
+			    edge[paths[i]] = item;
+			}else{
+			    if( !edge[paths[i]] ){
+			        edge[paths[i]] = {};
+			    }
+			}
+			edge = edge[paths[i]];
+		}
+	});
+//console.log(tree);
+    
+	var seekPackageNode = function(node,crr_level){
+		var sub_node_keys = Object.keys(node);
+		var files = [];
+		for( var i=0; i<sub_node_keys.length; i++ ){
+			var sub_node = node[sub_node_keys[i]];
+			if( sub_node.packagename ){
+				files.push(sub_node);
+			}else{
+				var next_level = crr_level + 1;
+				itemsNav += '<li class="packageDepth_' + crr_level + '">' + sub_node_keys[i] + '</li>';
+				var rendered_node = seekPackageNode(sub_node,next_level);
+				if( rendered_node ){
+					nav += rendered_node;
+				}
+			}
+		}
+		for( var i=0; i<files.length; i++ ){
+			var item = files[i];
+			
+			var displayName;
+			var methods = find({kind:'function', memberof: item.longname});
+			var members = find({kind:'member', memberof: item.longname});
+			var conf = env && env.conf || {};
+			
+			// show private class?
+			if (docdash.private === false && item.access === 'private') continue;
+			
+			itemsNav +=  '<li class="packageDepth_'+crr_level+'">';
+			if ( !hasOwnProp.call(item, 'longname') ) {
+				itemsNav += linktoFn('', item.name);
+			} else if ( !hasOwnProp.call(itemsSeen, item.longname) ) {
+				if (conf.templates.default.useLongnameInNav) {
+					displayName = item.longname;
+				} else {
+					displayName = item.name;
+				}
+				itemsNav += linktoFn(item.longname, displayName.replace(/\b(module|event):/g, ''));
+
+				if (docdash.static && members.find(function (m) { return m.scope === 'static'; } )) {
+					itemsNav += "<ul class='members'>";
+
+					members.forEach(function (member) {
+						if (!member.scope === 'static') return;
+						itemsNav += "<li data-type='member'";
+						if(docdash.collapse)
+							itemsNav += " style='display: none;'";
+						itemsNav += ">";
+						itemsNav += linkto(member.longname, member.name);
+						itemsNav += "</li>";
+					});
+
+					itemsNav += "</ul>";
+				}
+
+				if (methods.length) {
+					itemsNav += "<ul class='methods'>";
+
+					methods.forEach(function (method) {
+						itemsNav += "<li data-type='method'";
+						if(docdash.collapse)
+							itemsNav += " style='display: none;'";
+						itemsNav += ">";
+						itemsNav += linkto(method.longname, method.name);
+						itemsNav += "</li>";
+					});
+
+					itemsNav += "</ul>";
+				}
+
+				itemsSeen[item.longname] = true;
+			}
+			itemsNav += '</li>';
+		}
+	}
+	var level = 0;
+   	seekPackageNode(tree,level);
+	
+    if (itemsNav !== '') {
+        nav += '<h3>' + itemHeading + '</h3><ul>' + itemsNav + '</ul>';
+//        nav += '<ul>' + itemsNav + '</ul>';
+    }
+	
+    return nav;
+}
+
 function linktoTutorial(longName, name) {
     return tutoriallink(name);
 }
@@ -423,10 +538,11 @@ function linktoExternal(longName, name) {
  */
 
 function buildNav(members) {
-    var nav = '<h2><a href="index.html">Home</a></h2>';
     var seen = {};
     var seenTutorials = {};
     var docdash = env && env.conf && env.conf.docdash || {};
+//    var nav = "<h2><a href='index.html'>"+docdash.appname+"</a></h2>";
+    var nav = '';
     if(docdash.menu){
         for(var menu in docdash.menu){
             nav += '<h2><a ';
@@ -438,19 +554,22 @@ function buildNav(members) {
         }
     }
     var defaultOrder = [
-        'Classes', 'Modules', 'Externals', 'Events', 'Namespaces', 'Mixins', 'Tutorials', 'Interfaces'
+//      'Packages','Classes', 'Modules', 'Externals', 'Events', 'Namespaces', 'Mixins', 'Tutorials', 'Interfaces'
+        'Packages'
     ];
-    var order = docdash.sectionOrder || defaultOrder;
+    var order = defaultOrder;
     var sections = {
-        Classes: buildMemberNav(members.classes, 'Classes', seen, linkto),
-        Modules: buildMemberNav(members.modules, 'Modules', {}, linkto),
-        Externals: buildMemberNav(members.externals, 'Externals', seen, linktoExternal),
-        Events: buildMemberNav(members.events, 'Events', seen, linkto),
-        Namespaces: buildMemberNav(members.namespaces, 'Namespaces', seen, linkto),
-        Mixins: buildMemberNav(members.mixins, 'Mixins', seen, linkto),
-        Tutorials: buildMemberNav(members.tutorials, 'Tutorials', seenTutorials, linktoTutorial),
-        Interfaces: buildMemberNav(members.interfaces, 'Interfaces', seen, linkto),
+    	Packages: buildPackageNav(members.packagenames, 'Packages', seen, linkto),
+//        Classes: buildMemberNav(members.classes, 'Classes', seen, linkto),
+//        Modules: buildMemberNav(members.modules, 'Modules', {}, linkto),
+//        Externals: buildMemberNav(members.externals, 'Externals', seen, linktoExternal),
+//        Events: buildMemberNav(members.events, 'Events', seen, linkto),
+//        Namespaces: buildMemberNav(members.namespaces, 'Namespaces', seen, linkto),
+//        Mixins: buildMemberNav(members.mixins, 'Mixins', seen, linkto),
+//        Tutorials: buildMemberNav(members.tutorials, 'Tutorials', seenTutorials, linktoTutorial),
+//        Interfaces: buildMemberNav(members.interfaces, 'Interfaces', seen, linkto),
     };
+
     order.forEach(member => nav += sections[member]);
 
     if (members.globals.length) {
@@ -707,6 +826,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     indexUrl);
 
     // set up the lists that we'll use to generate pages
+	var packagenames = taffy(members.packagenames);
     var classes = taffy(members.classes);
     var modules = taffy(members.modules);
     var namespaces = taffy(members.namespaces);
@@ -718,6 +838,11 @@ exports.publish = function(taffyData, opts, tutorials) {
         var myModules = helper.find(modules, {longname: longname});
         if (myModules.length) {
             generate('Module', myModules[0].name, myModules, helper.longnameToUrl[longname]);
+        }
+
+        var myPackagenames = helper.find(packagenames, {longname: longname});
+        if (myPackagenames.length) {
+            generate('Package', myPackagenames[0].name, myPackagenames, helper.longnameToUrl[longname]);
         }
 
         var myClasses = helper.find(classes, {longname: longname});

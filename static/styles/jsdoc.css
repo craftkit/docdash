@@ -139,7 +139,7 @@ tt, code, kbd, samp {
 #main {
   float: right;
   min-width: 360px;
-  width: calc(100% - 240px);
+  width: calc(100% - 290px);
 }
 
 header {
@@ -166,7 +166,7 @@ section {
 nav {
   float: left;
   display: block;
-  width: 250px;
+  width: 300px;
   background: #fff;
   overflow: auto;
   position: fixed;
@@ -181,7 +181,7 @@ nav #nav-search{
     line-height: 1.5;
     border-radius: 3px;
     margin-right: 20px;
-    margin-top: 20px;
+    margin-top: 0px;
 }
 
 nav.wrap a{
@@ -255,7 +255,7 @@ nav > h2 > a {
 
 footer {
   color: hsl(0, 0%, 28%);
-  margin-left: 250px;
+  margin-left: 300px;
   display: block;
   padding: 15px;
   font-style: italic;
@@ -620,13 +620,13 @@ html[data-search-mode] .level-hide {
 
   nav {
     background: #FFF;
-    width: 250px;
+    width: 300px;
     height: 100%;
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    left: -250px;
+    left: -300px;
     z-index: 3;
     padding: 0 10px;
     transition: left 0.2s;
@@ -669,3 +669,55 @@ html[data-search-mode] .level-hide {
 #disqus_thread{
     margin-left: 30px;
 }
+
+.appname {
+  font-size: 16px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  line-height: 50px;
+  padding: 0;
+  color: #606;
+}
+
+.packageDepth_0 {
+  color: #606;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-left: 0px;
+}
+
+.packageDepth_1 {
+  color: #606;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.packageDepth_2 {
+  color: #606;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
+.packageDepth_3 {
+  color: #606;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-left: 30px;
+}
+
+.packageDepth_4 {
+  color: #606;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-left: 40px;
+}
+
+.packageDepth_5 {
+  color: #606;
+  font-size: 12px;
+  margin-top: 10px;
+  margin-left: 50px;
+}
+

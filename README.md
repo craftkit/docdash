@@ -3,9 +3,25 @@
 
 A clean, responsive documentation template theme for JSDoc 3.
 
-![docdash-screenshot](https://cloud.githubusercontent.com/assets/447956/13398144/4dde7f36-defd-11e5-8909-1a9013302cb9.png)
 
-![docdash-screenshot-2](https://cloud.githubusercontent.com/assets/447956/13401057/e30effd8-df0a-11e5-9f51-66257ac38e94.jpg)
+## Changes for Craft-UIKit
+
+Docdash midified for Craft-UIKit.
+
+### add @packagename
+
+* define package name
+* make package tree in PACKAGES section
+* only shows PACKAGES (dont show namespace, class and so on)
+
+### cosmetic change for template
+
+* some fix for PACKAGES
+
+### appname
+
+* conf.docdash.appname in Nav top
+
 
 ## Example
 See http://clenemt.github.io/docdash/ for a sample demo. :rocket:
